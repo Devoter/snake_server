@@ -2,13 +2,14 @@ import bottle.ext.sqlite
 import bottle
 import json
 import re
+import settings
 
 from datetime import datetime
 from hashlib import sha256
 from bottle import request, response
 
 app = bottle.Bottle()
-plugin = bottle.ext.sqlite.Plugin(dbfile='db.sqlite3')
+plugin = bottle.ext.sqlite.Plugin(dbfile=settings.DATABASE)
 app.install(plugin)
 
 
@@ -74,4 +75,4 @@ def append_score(db):
     return json.dumps(updated_score)
 
 
-app.run(host='0.0.0.0', port=8000)
+app.run(host=settings.HOST, port=settings.PORT)
