@@ -5,8 +5,8 @@ import re
 import settings
 
 from datetime import datetime
-from hashlib import sha256
 from bottle import request, response
+from encrypt import encrypt
 
 app = bottle.Bottle()
 plugin = bottle.ext.sqlite.Plugin(dbfile=settings.DATABASE)
@@ -20,10 +20,10 @@ def set_headers():
     response.set_header('Access-Control-Allow-Headers', 'Origin, Content-Type, X-Auth-Token')
 
 
-def get_score(db):
+def get_score(db, new_id=''):
     score = []
-    for row in db.execute('SELECT score, name FROM scores ORDER BY score DESC, created ASC'):
-        score.append({'score': row[0], 'name': row[1]})
+    for row in db.execute('SELECT id, score, name FROM scores ORDER BY score DESC, created ASC'):
+        score.append({'score': row[1], 'name': row[2], 'you': row[0] == new_id})
 
     return score
 
@@ -50,7 +50,7 @@ def append_score(db):
     data = request.json
     set_headers()
     if ('name' not in data) or ('score' not in data) or ('hash' not in data) or (type(data['name']) is not str) or (
-            type(data['score']) is not int) or (re.match(r'^[0-9a-zA-Z_\-. ]{1,20}$', data['name']) is None) or (
+            type(data['score']) is not int) or (re.match(r'^[0-9A-Z_\-.\'"]{1,10}$', data['name']) is None) or (
             data['score'] < 0):
         response.status = 400
         return
@@ -58,19 +58,28 @@ def append_score(db):
     name = data['name']
     score = data['score']
     sum = data['hash']
-
-    checksum = sha256()
-    checksum.update((name + str(score)).encode('utf-8'))
-    for i in range(0, 1000):
-        checksum.update(checksum.hexdigest().encode('utf-8'))
+    checksum = encrypt(name, score)
 
     if checksum.hexdigest() != sum:
         response.status = 400
         return
 
     timestamp = int(datetime.now().timestamp())
-    db.execute('INSERT OR IGNORE INTO scores VALUES (?, ?, ?, ?)', (sum, name, score, timestamp))
-    updated_score = get_score(db)
+    ignore = False
+    count = db.execute('SELECT COUNT(*) as cnt FROM scores ORDER BY score DESC, created ASC').fetchone()[0]
+
+    if count >= 50:
+        less = db.execute('SELECT COUNT(*) as cnt FROM scores WHERE score < ?', (score,)).fetchone()[0]
+        if less > 0:
+            db.execute(
+                'DELETE FROM scores WHERE rowid = (SELECT rowid FROM scores ORDER BY score ASC, created DESC LIMIT 1)')
+        else:
+            ignore = True
+
+    if ignore is False:
+        db.execute('INSERT OR IGNORE INTO scores VALUES (?, ?, ?, ?)', (sum, name, score, timestamp))
+
+    updated_score = get_score(db, sum)
     response.status = 201
     return json.dumps(updated_score)
 
