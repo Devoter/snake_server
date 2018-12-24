@@ -14,6 +14,13 @@ pip install wheel
 pip install -r requirements
 ```
 
+## Hash
+
+Hash function is required to communicate with the client. You can use default encrypt function:
+```sh
+cp encrypt.example.py encrypt.py
+```
+
 ## Start
 
 ```python
