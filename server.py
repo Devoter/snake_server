@@ -8,7 +8,7 @@ from datetime import datetime
 from bottle import request, response
 from encrypt import encrypt
 
-app = bottle.Bottle()
+app = application = bottle.Bottle()
 plugin = bottle.ext.sqlite.Plugin(dbfile=settings.DATABASE)
 app.install(plugin)
 
@@ -84,4 +84,5 @@ def append_score(db):
     return json.dumps(updated_score)
 
 
-app.run(host=settings.HOST, port=settings.PORT)
+if __name__ == "__main__":
+    app.run(host=settings.HOST, port=settings.PORT)
