@@ -26,3 +26,7 @@ cp encrypt.example.py encrypt.py
 ```bash
 python server.py
 ```
+
+## License
+
+[MIT](LICENSE)
