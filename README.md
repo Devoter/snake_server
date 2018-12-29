@@ -13,7 +13,7 @@ Server for [Retro snake](https://github.com/Devoter/snake). Based on [bottle fra
 python3 -m venv env
 source env/bin/activate
 pip install wheel
-pip install -r requirements
+pip install -r requirements.txt
 ```
 
 ## Hash
