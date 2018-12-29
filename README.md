@@ -2,6 +2,8 @@
 
 Server for [Retro snake](https://github.com/Devoter/snake). Based on [bottle framework](https://github.com/bottlepy/bottle).
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 ## Installation
 
 * `git clone <repository-url>` this repository
